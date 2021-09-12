@@ -4,6 +4,7 @@ import (
   "context"
   "mywallet/application/apperror"
   "mywallet/domain/entity"
+  "mywallet/domain/repository"
 )
 
 //go:generate mockery --name Outport -output mocks/
@@ -24,30 +25,39 @@ func (r *addnewCardInteractor) Execute(ctx context.Context, req InportRequest) (
 
   res := &InportResponse{}
 
-  walletObj, err := r.outport.FindWalletByID(ctx, req.WalletID)
-  if err != nil {
-    return nil, err
-  }
+  err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
-  if walletObj.User.ID != req.UserID {
-    return nil, apperror.UserIDDoesNotMatch
-  }
+    walletObj, err := r.outport.FindWalletByID(ctx, req.WalletID)
+    if err != nil {
+      return err
+    }
 
-  cardObj, err := entity.NewCard(entity.CardRequest{
-    CardName:      req.CardName,
-    LimitAmount:   req.LimitAmount,
-    LimitDuration: req.LimitDuration,
+    if walletObj.User.ID != req.UserID {
+      return apperror.UserIDDoesNotMatch
+    }
+
+    cardObj, err := entity.NewCard(entity.CardRequest{
+      CardName:      req.CardName,
+      LimitAmount:   req.LimitAmount,
+      LimitDuration: req.LimitDuration,
+    })
+    if err != nil {
+      return err
+    }
+
+    err = walletObj.AddCard(cardObj)
+    if err != nil {
+      return err
+    }
+
+    err = r.outport.SaveCard(ctx, walletObj, cardObj)
+    if err != nil {
+      return err
+    }
+
+    return nil
   })
-  if err != nil {
-    return nil, err
-  }
 
-  err = walletObj.AddCard(cardObj)
-  if err != nil {
-    return nil, err
-  }
-
-  err = r.outport.SaveWallet(ctx, walletObj)
   if err != nil {
     return nil, err
   }

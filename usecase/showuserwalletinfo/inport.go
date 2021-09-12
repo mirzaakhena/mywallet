@@ -1,4 +1,4 @@
-package showalluserwallet
+package showuserwalletinfo
 
 import (
   "context"
@@ -17,5 +17,6 @@ type InportRequest struct {
 
 // InportResponse is response payload after running the usecase ShowAllUserWallet
 type InportResponse struct {
-  Wallets []*entity.Wallet
+  Wallets            []*entity.Wallet
+  CardSpendHistories []*entity.CardSpendHistory
 }

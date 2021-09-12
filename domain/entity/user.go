@@ -1,29 +1,28 @@
 package entity
 
 import (
-	"mywallet/application/apperror"
-	"strings"
+  "mywallet/application/apperror"
 )
 
 type User struct {
-    ID string `` //
+  ID   string `` //
+  Name string
 }
 
-type UserRequest struct {
-	Name string
+
+func NewUser(id, name string) (*User, error) {
+
+  if id == "" {
+    return nil, apperror.UserIDMustNotEmpty
+  }
+
+  if name == "" {
+    return nil, apperror.UserNameMustNotEmpty
+  }
+
+  var obj User
+  obj.ID = id
+  obj.Name = name
+
+  return &obj, nil
 }
-
-func NewUser(req UserRequest) (*User, error) {
-
-	if req.Name == "" {
-		return nil, apperror.UserNameMustNotEmpty
-	}
-
-	id := strings.ToLower(strings.ReplaceAll(req.Name, " ", ""))
-
-	var obj User
-	obj.ID = id
-
-	return &obj, nil
-}
-

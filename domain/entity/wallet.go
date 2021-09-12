@@ -9,6 +9,7 @@ import (
 
 type Wallet struct {
   ID      string `` //
+  Name    string
   User    *User
   Balance vo.Money
   Cards   []*Card
@@ -117,7 +118,6 @@ func (w *Wallet) stillPossibleToSpend(lastDate, now time.Time, limitTime vo.Limi
 
     return stillPossibleToSpend, nil
   }
-
 
   if limitTime == vo.WeeklyLimitTimeEnum {
     stillPossibleToSpend, err := w.inTheSameWeek(lastDate, now)

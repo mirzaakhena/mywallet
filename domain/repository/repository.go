@@ -27,7 +27,7 @@ type SaveWalletRepo interface {
 }
 
 type SaveCardRepo interface {
-	SaveCard(ctx context.Context, obj *entity.Card) error
+	SaveCard(ctx context.Context, walletID string, newCard *entity.Card) error
 }
 
 type FindUserByIDRepo interface {
@@ -44,4 +44,8 @@ type UpdateWalletBalanceRepo interface {
 
 type FindLastCardSpendHistoryRepo interface {
 	FindLastCardSpendHistory(ctx context.Context, cardID string) (*entity.CardSpendHistory, error)
+}
+
+type FindAllCardSpendHistoryRepo interface {
+	FindAllCardSpendHistory(ctx context.Context, someID string) ([]*entity.CardSpendHistory, error)
 }

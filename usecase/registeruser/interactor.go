@@ -3,6 +3,7 @@ package registeruser
 import (
   "context"
   "mywallet/domain/entity"
+  "mywallet/domain/repository"
 )
 
 //go:generate mockery --name Outport -output mocks/
@@ -23,12 +24,21 @@ func (r *registerUserInteractor) Execute(ctx context.Context, req InportRequest)
 
   res := &InportResponse{}
 
-  userObj, err := entity.NewUser(entity.UserRequest{Name: req.Name})
-  if err != nil {
-    return nil, err
-  }
+  err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
-  err = r.outport.SaveUser(ctx, userObj)
+    userObj, err := entity.NewUser(entity.UserRequest{Name: req.Name})
+    if err != nil {
+      return err
+    }
+
+    err = r.outport.SaveUser(ctx, userObj)
+    if err != nil {
+      return err
+    }
+
+    return nil
+  })
+
   if err != nil {
     return nil, err
   }

@@ -8,4 +8,5 @@ type Outport interface {
 	repository.SaveCardSpendHistoryRepo
 	repository.UpdateWalletBalanceRepo
 	repository.FindLastCardSpendHistoryRepo
+	repository.WithTransactionDB
 }

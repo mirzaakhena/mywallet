@@ -6,4 +6,5 @@ import "mywallet/domain/repository"
 type Outport interface {
 	repository.SaveWalletRepo
 	repository.FindUserByIDRepo
+	repository.WithTransactionDB
 }
