@@ -6,7 +6,8 @@ import (
 )
 
 type Card struct {
-  ID            string `` //
+  ID            string
+  WalletID      string
   Name          string
   LimitAmount   vo.Money
   LimitDuration vo.LimitTime

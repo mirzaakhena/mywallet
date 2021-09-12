@@ -35,7 +35,7 @@ type FindUserByIDRepo interface {
 }
 
 type FindWalletByIDRepo interface {
-	FindWalletByID(ctx context.Context, someID string) (*entity.Wallet, error)
+	FindWalletByID(ctx context.Context, walletID string) (*entity.Wallet, error)
 }
 
 type UpdateWalletBalanceRepo interface {
@@ -47,5 +47,5 @@ type FindLastCardSpendHistoryRepo interface {
 }
 
 type FindAllCardSpendHistoryRepo interface {
-	FindAllCardSpendHistory(ctx context.Context, someID string) ([]*entity.CardSpendHistory, error)
+	FindAllCardSpendHistory(ctx context.Context, userID string) ([]*entity.CardSpendHistory, error)
 }

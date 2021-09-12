@@ -27,10 +27,7 @@ func (r *addNewWalletInteractor) Execute(ctx context.Context, req InportRequest)
 
   err := repository.WithTrx(ctx, r.outport, func(dbCtx context.Context) error {
 
-    cardID := r.outport.GenerateID(ctx)
-
     cardObj, err := entity.NewCard(entity.CardRequest{
-      ID:            cardID,
       CardName:      req.CardName,
       LimitAmount:   req.LimitAmount,
       LimitDuration: req.LimitDuration,
@@ -47,10 +44,7 @@ func (r *addNewWalletInteractor) Execute(ctx context.Context, req InportRequest)
       return apperror.UserIsNotFound
     }
 
-    walletID := r.outport.GenerateID(ctx)
-
     walletObj, err := entity.NewWallet(entity.WalletRequest{
-      ID:         walletID,
       WalletName: req.WalletName,
       User:       userObj,
       Card:       cardObj,

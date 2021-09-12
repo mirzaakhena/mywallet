@@ -9,7 +9,9 @@ import (
 type CardSpendHistory struct {
   ID               string
   User             *User
+  UserID           string
   Card             *Card
+  CardID           string
   Amount           vo.Money // currently it is not very useful here
   BalanceRemaining vo.Money
   Date             time.Time

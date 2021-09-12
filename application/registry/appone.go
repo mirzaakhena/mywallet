@@ -1,11 +1,10 @@
 package registry
 
 import (
-  "context"
   "mywallet/application"
   "mywallet/controller/userapi"
-  "mywallet/gateway/inmemory"
-  "mywallet/infrastructure/log"
+  "mywallet/gateway/indatabase"
+  "mywallet/infrastructure/database"
   "mywallet/infrastructure/server"
   "mywallet/usecase/addnewcard"
   "mywallet/usecase/addnewwallet"
@@ -14,7 +13,6 @@ import (
   "mywallet/usecase/showuserwalletinfo"
   "mywallet/usecase/spendmoney"
   "mywallet/usecase/topupwallet"
-  "os"
 )
 
 type appone struct {
@@ -25,17 +23,10 @@ type appone struct {
 func NewAppone() func() application.RegistryContract {
   return func() application.RegistryContract {
 
-    httpHandler, err := server.NewGinHTTPHandler(":8080")
-    if err != nil {
-      log.Error(context.Background(), "%v", err.Error())
-      os.Exit(1)
-    }
+    httpHandler := server.NewGinHTTPHandlerDefault()
+    db := database.NewGormDefault()
 
-    datasource, err := inmemory.NewProdGateway()
-    if err != nil {
-      log.Error(context.Background(), "%v", err.Error())
-      os.Exit(1)
-    }
+    datasource := indatabase.NewProdGateway(db)
 
     return &appone{
       GinHTTPHandler: httpHandler,

@@ -1,13 +1,11 @@
 package registeruser
 
 import (
-	"mywallet/domain/repository"
-	"mywallet/domain/service"
+  "mywallet/domain/repository"
 )
 
 // Outport of RegisterUser
 type Outport interface {
-	repository.SaveUserRepo
-	repository.WithTransactionDB
-	service.GenerateIDService
+  repository.SaveUserRepo
+  repository.WithTransactionDB
 }

@@ -7,15 +7,16 @@ import (
 )
 
 type Wallet struct {
-  ID      string `` //
+  ID      string
   Name    string
   User    *User
+  UserID  string
   Balance vo.Money
   Cards   []*Card
 }
 
 type WalletRequest struct {
-  ID         string `` //
+  ID         string
   WalletName string
   User       *User
   Card       *Card
@@ -112,7 +113,6 @@ func (w *Wallet) SpendRemainingBalance(remainingBalance, amountToSpend vo.Money,
 
   return &newCardSpend, nil
 }
-
 
 func (w *Wallet) FindCard(cardID string) (*Card, error) {
   for _, c := range w.Cards {
