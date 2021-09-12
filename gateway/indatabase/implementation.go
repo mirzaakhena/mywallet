@@ -20,6 +20,10 @@ func NewProdGateway(db *gorm.DB) *prodGateway {
   }
 }
 
+func (r *prodGateway) GenerateID(ctx context.Context) string {
+  return ""
+}
+
 func (r *prodGateway) SaveUser(ctx context.Context, obj *entity.User) error {
   return r.commonSaving(ctx, obj)
 }

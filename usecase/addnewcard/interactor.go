@@ -36,7 +36,10 @@ func (r *addnewCardInteractor) Execute(ctx context.Context, req InportRequest) (
       return apperror.UserIDDoesNotMatch
     }
 
+    cardID := r.outport.GenerateID(ctx)
+
     cardObj, err := entity.NewCard(entity.CardRequest{
+      ID:            cardID,
       CardName:      req.CardName,
       LimitAmount:   req.LimitAmount,
       LimitDuration: req.LimitDuration,
@@ -50,7 +53,7 @@ func (r *addnewCardInteractor) Execute(ctx context.Context, req InportRequest) (
       return err
     }
 
-    err = r.outport.SaveCard(ctx, walletObj, cardObj)
+    err = r.outport.SaveCard(ctx, walletObj.ID, cardObj)
     if err != nil {
       return err
     }

@@ -3,7 +3,6 @@ package entity
 import (
   "mywallet/application/apperror"
   "mywallet/domain/vo"
-  "strings"
   "time"
 )
 
@@ -16,12 +15,17 @@ type Wallet struct {
 }
 
 type WalletRequest struct {
+  ID         string `` //
   WalletName string
   User       *User
   Card       *Card
 }
 
 func NewWallet(req WalletRequest) (*Wallet, error) {
+
+  if req.ID == "" {
+    return nil, apperror.WalletIDMustNotEmpty
+  }
 
   if req.WalletName == "" {
     return nil, apperror.WalletNameMustNotEmpty
@@ -36,7 +40,8 @@ func NewWallet(req WalletRequest) (*Wallet, error) {
   }
 
   var obj Wallet
-  obj.ID = strings.ToLower(strings.ReplaceAll(req.WalletName, " ", ""))
+  obj.ID = req.ID
+  obj.Name = req.WalletName
   obj.User = req.User
   obj.Cards = append(obj.Cards, req.Card)
   obj.Balance = vo.NewMoneyZero()
@@ -61,31 +66,31 @@ func (w *Wallet) Topup(amount vo.Money) error {
   return nil
 }
 
-func (w *Wallet) Spend(lastCardSpendHistory *CardSpendHistory, amount vo.Money, cardID string, now time.Time) (*CardSpendHistory, error) {
+//func (w *Wallet) Spend(lastCardSpendHistory *CardSpendHistory, amount vo.Money, cardID string, now time.Time) (*CardSpendHistory, error) {
+//
+//  card := w.FindCard(cardID)
+//
+//  // user never used the balance yet
+//  if lastCardSpendHistory == nil {
+//    return w.NewLimitToSpend(amount, card, now)
+//  }
+//
+//  // user already use the balance, so we need to check the limit time
+//  stillPossibleToSpend, err := lastCardSpendHistory.IsStillPossibleToSpend(now)
+//  if err != nil {
+//    return nil, err
+//  }
+//
+//  if stillPossibleToSpend {
+//    return w.SpendRemainingBalance(lastCardSpendHistory.BalanceRemaining, amount, card, now)
+//  }
+//
+//  // it is in the next time
+//  return w.NewLimitToSpend(amount, card, now)
+//
+//}
 
-  card := w.findCard(cardID)
-
-  // user never used the balance yet
-  if lastCardSpendHistory == nil {
-    return w.newLimitToSpend(amount, card, now)
-  }
-
-  // user already use the balance, so we need to check the limit time
-  stillPossibleToSpend, err := w.stillPossibleToSpend(lastCardSpendHistory.Date, now, card.LimitDuration)
-  if err != nil {
-    return nil, err
-  }
-
-  if stillPossibleToSpend {
-    return w.spendRemainingBalance(lastCardSpendHistory.BalanceRemaining, amount, card, now)
-  }
-
-  // it is in the next time
-  return w.newLimitToSpend(amount, card, now)
-
-}
-
-func (w *Wallet) spendRemainingBalance(remainingBalance, amountToSpend vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
+func (w *Wallet) SpendRemainingBalance(remainingBalance, amountToSpend vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
 
   if remainingBalance == 0 {
     return nil, apperror.CardLimitReachZero
@@ -108,49 +113,17 @@ func (w *Wallet) spendRemainingBalance(remainingBalance, amountToSpend vo.Money,
   return &newCardSpend, nil
 }
 
-func (w *Wallet) stillPossibleToSpend(lastDate, now time.Time, limitTime vo.LimitTime) (bool, error) {
 
-  if limitTime == vo.DailyLimitTimeEnum {
-    stillPossibleToSpend, err := w.inTheSameDay(lastDate, now)
-    if err != nil {
-      return false, err
-    }
-
-    return stillPossibleToSpend, nil
-  }
-
-  if limitTime == vo.WeeklyLimitTimeEnum {
-    stillPossibleToSpend, err := w.inTheSameWeek(lastDate, now)
-    if err != nil {
-      return false, err
-    }
-    return stillPossibleToSpend, nil
-
-  }
-
-  if limitTime == vo.MonthlyLimitTimeEnum {
-    stillPossibleToSpend, err := w.inTheSameMonth(lastDate, now)
-    if err != nil {
-      return false, err
-    }
-
-    return stillPossibleToSpend, nil
-  }
-
-  return false, apperror.UnrecognizedLimitTime
-
-}
-
-func (w *Wallet) findCard(cardID string) *Card {
+func (w *Wallet) FindCard(cardID string) (*Card, error) {
   for _, c := range w.Cards {
     if c.ID == cardID {
-      return c
+      return c, nil
     }
   }
-  return nil
+  return nil, apperror.CardNotFound
 }
 
-func (w *Wallet) newLimitToSpend(amount vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
+func (w *Wallet) NewLimitToSpend(amount vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
 
   if amount > w.Balance {
     return nil, apperror.AmountGreaterThanBalance
@@ -172,50 +145,4 @@ func (w *Wallet) newLimitToSpend(amount vo.Money, card *Card, now time.Time) (*C
 
   return &newUserSpend, nil
 
-}
-
-func (w *Wallet) inTheSameDay(lastDate time.Time, now time.Time) (bool, error) {
-
-  err := w.validateNowAsFuture(lastDate, now)
-  if err != nil {
-    return false, err
-  }
-
-  y1, m1, d1 := lastDate.Date()
-  y2, m2, d2 := now.Date()
-
-  return y1 == y2 && m1 == m2 && d1 == d2, nil
-}
-
-func (w *Wallet) inTheSameWeek(lastDate time.Time, now time.Time) (bool, error) {
-
-  err := w.validateNowAsFuture(lastDate, now)
-  if err != nil {
-    return false, err
-  }
-
-  y1, w1 := lastDate.ISOWeek()
-  y2, w2 := lastDate.ISOWeek()
-
-  return y1 == y2 && w1 == w2, nil
-}
-
-func (w *Wallet) inTheSameMonth(lastDate time.Time, now time.Time) (bool, error) {
-
-  err := w.validateNowAsFuture(lastDate, now)
-  if err != nil {
-    return false, err
-  }
-
-  y1, m1, _ := lastDate.Date()
-  y2, m2, _ := now.Date()
-
-  return y1 == y2 && m1 == m2, nil
-}
-
-func (w *Wallet) validateNowAsFuture(lastDate time.Time, now time.Time) error {
-  if now.Before(lastDate) {
-    return apperror.DateNowMustFutureFromLastDate
-  }
-  return nil
 }

@@ -22,4 +22,7 @@ const (
 	DateNowMustFutureFromLastDate           ErrorType = "ER1000 date now must future from last date"   //
 	UnrecognizedLimitTime                   ErrorType = "ER1000 unrecognized limit time"               //
 	UserIDMustNotEmpty                      ErrorType = "ER1000 user id must not empty"                //
+	WalletIDMustNotEmpty                    ErrorType = "ER1000 wallet id must not empty"              //
+	CardIDMustNotEmpty                      ErrorType = "ER1000 card id must not empty"                //
+	CardNotFound                            ErrorType = "ER1000 card not found"                        //
 )

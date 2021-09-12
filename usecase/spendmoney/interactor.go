@@ -3,6 +3,7 @@ package spendmoney
 import (
   "context"
   "mywallet/application/apperror"
+  "mywallet/domain/entity"
   "mywallet/domain/repository"
   "mywallet/domain/vo"
 )
@@ -25,6 +26,8 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
 
   res := &InportResponse{}
 
+  var cardSpendHistoryObj *entity.CardSpendHistory
+
   err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
     walletObj, err := r.outport.FindWalletByID(ctx, req.WalletID)
@@ -41,12 +44,39 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
       return err
     }
 
-    cardSpendHistoryObj, err := r.outport.FindLastCardSpendHistory(ctx, req.CardID)
+    cardSpendHistoryObj, err = r.outport.FindLastCardSpendHistory(ctx, req.CardID)
     if err != nil {
       return err
     }
 
-    ushObj, err := walletObj.Spend(cardSpendHistoryObj, amountToSpend, req.CardID, req.Date)
+    card, err := walletObj.FindCard(req.CardID)
+    if err != nil {
+      return err
+    }
+
+    if cardSpendHistoryObj == nil {
+      cardSpendHistoryObj, err = walletObj.NewLimitToSpend(amountToSpend, card, req.Date)
+      if err != nil {
+        return err
+      }
+      return nil
+    }
+
+    // user already use the balance, so we need to check the limit time
+    stillPossibleToSpend, err := cardSpendHistoryObj.IsStillPossibleToSpend(req.Date)
+    if err != nil {
+      return err
+    }
+
+    if stillPossibleToSpend {
+      cardSpendHistoryObj, err = walletObj.SpendRemainingBalance(cardSpendHistoryObj.BalanceRemaining, amountToSpend, card, req.Date)
+      if err != nil {
+        return err
+      }
+      return nil
+    }
+
+    cardSpendHistoryObj, err = walletObj.NewLimitToSpend(amountToSpend, card, req.Date)
     if err != nil {
       return err
     }
@@ -56,7 +86,7 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
       return err
     }
 
-    err = r.outport.SaveCardSpendHistory(ctx, ushObj)
+    err = r.outport.SaveCardSpendHistory(ctx, cardSpendHistoryObj)
     if err != nil {
       return err
     }

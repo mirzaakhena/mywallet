@@ -3,22 +3,27 @@ package entity
 import (
   "mywallet/application/apperror"
   "mywallet/domain/vo"
-  "strings"
 )
 
 type Card struct {
   ID            string `` //
+  Name          string
   LimitAmount   vo.Money
   LimitDuration vo.LimitTime
 }
 
 type CardRequest struct {
+  ID            string `` //
   CardName      string
   LimitAmount   float64
   LimitDuration string
 }
 
 func NewCard(req CardRequest) (obj *Card, err error) {
+
+  if req.ID == "" {
+    return nil, apperror.CardIDMustNotEmpty
+  }
 
   if req.CardName == "" {
     return nil, apperror.CardUserNameMustNotEmpty
@@ -33,7 +38,8 @@ func NewCard(req CardRequest) (obj *Card, err error) {
     return nil, apperror.LimitAmountMustNotZero
   }
 
-  obj.ID = strings.ToLower(strings.ReplaceAll(req.CardName, " ", ""))
+  obj.ID = req.ID
+  obj.Name = req.CardName
   obj.LimitAmount = limitAmount
   obj.LimitDuration, err = vo.NewLimitTime(req.LimitDuration)
   if err != nil {

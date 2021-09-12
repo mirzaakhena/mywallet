@@ -26,7 +26,9 @@ func (r *registerUserInteractor) Execute(ctx context.Context, req InportRequest)
 
   err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
-    userObj, err := entity.NewUser(entity.UserRequest{Name: req.Name})
+    id := r.outport.GenerateID(ctx)
+
+    userObj, err := entity.NewUser(id, req.Name)
     if err != nil {
       return err
     }

@@ -14,6 +14,11 @@ type prodGateway struct {
   wallets []entity.Wallet
 }
 
+func (r *prodGateway) GenerateID(ctx context.Context) string {
+
+  return ""
+}
+
 func (r *prodGateway) GetDatabase(ctx context.Context) (context.Context, error) {
   return ctx, nil
 }
