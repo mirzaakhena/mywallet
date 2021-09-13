@@ -5,6 +5,7 @@ import (
   "mywallet/infrastructure/util"
   "mywallet/usecase/showuserwalletinfo"
   "net/http"
+  "time"
 
   "github.com/gin-gonic/gin"
 )
@@ -13,10 +14,12 @@ import (
 func (r *Controller) showUserWalletInfoHandler(inputPort showuserwalletinfo.Inport) gin.HandlerFunc {
 
   type Card struct {
-    ID            string
-    Name          string
-    LimitAmount   float64
-    LimitDuration string
+    ID               string
+    Name             string
+    LimitAmount      float64
+    LimitDuration    string
+    BalanceRemaining float64
+    LastUsedDate     time.Time
   }
 
   type Wallet struct {
@@ -53,11 +56,16 @@ func (r *Controller) showUserWalletInfoHandler(inputPort showuserwalletinfo.Inpo
       var cards []Card
 
       for _, card := range wallet.Cards {
+
+        c := res.CardSpendHistories[card.ID]
+
         cards = append(cards, Card{
-          ID:            card.ID,
-          Name:          card.Name,
-          LimitAmount:   float64(card.LimitAmount),
-          LimitDuration: string(card.LimitDuration),
+          ID:               card.ID,
+          Name:             card.Name,
+          LimitAmount:      float64(card.LimitAmount),
+          LimitDuration:    string(card.LimitDuration),
+          BalanceRemaining: float64(c.BalanceRemaining),
+          LastUsedDate:     c.Date,
         })
       }
 

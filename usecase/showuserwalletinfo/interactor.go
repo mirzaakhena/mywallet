@@ -2,7 +2,9 @@ package showuserwalletinfo
 
 import (
   "context"
+  "mywallet/domain/entity"
   "mywallet/domain/repository"
+  "time"
 )
 
 //go:generate mockery --name Outport -output mocks/
@@ -37,7 +39,7 @@ func (r *showUserWalletInfoInteractor) Execute(ctx context.Context, req InportRe
       return err
     }
 
-    res.CardSpendHistories = csh
+    res.CardSpendHistories = r.convertToMap(walletObjs, csh)
 
     return nil
   })
@@ -47,4 +49,32 @@ func (r *showUserWalletInfoInteractor) Execute(ctx context.Context, req InportRe
   }
 
   return res, nil
+}
+
+func (r *showUserWalletInfoInteractor) convertToMap(wallets []*entity.Wallet, csh []*entity.CardSpendHistory) map[string]*entity.CardSpendHistory {
+
+  mapCard := map[string]*entity.CardSpendHistory{}
+  for _, c := range csh {
+    mapCard[c.CardID] = c
+  }
+
+  for _, w := range wallets {
+    for _, c := range w.Cards {
+      _, exist := mapCard[c.ID]
+      if !exist {
+        mapCard[c.ID] = &entity.CardSpendHistory{
+          ID:               "",
+          User:             nil,
+          UserID:           w.UserID,
+          Card:             nil,
+          CardID:           c.ID,
+          Amount:           0,
+          BalanceRemaining: c.LimitAmount,
+          Date:             time.Time{},
+        }
+      }
+    }
+  }
+
+  return mapCard
 }

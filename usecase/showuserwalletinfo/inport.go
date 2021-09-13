@@ -18,5 +18,5 @@ type InportRequest struct {
 // InportResponse is response payload after running the usecase ShowAllUserWallet
 type InportResponse struct {
   Wallets            []*entity.Wallet
-  CardSpendHistories []*entity.CardSpendHistory
+  CardSpendHistories map[string]*entity.CardSpendHistory
 }

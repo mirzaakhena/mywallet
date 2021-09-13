@@ -161,7 +161,7 @@ func (r *prodGateway) FindAllCardSpendHistory(ctx context.Context, userID string
   }
 
   var cardSpendHistoryObj []*entity.CardSpendHistory
-  err = db.Find(&cardSpendHistoryObj, "user_id = ?", userID).Error
+  err = db.Order("date desc").Group("card_id").Find(&cardSpendHistoryObj, "user_id = ?", userID).Error
   if err != nil {
     log.Error(ctx, err.Error())
     return nil, err
