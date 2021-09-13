@@ -26,7 +26,10 @@ func (r *registerUserInteractor) Execute(ctx context.Context, req InportRequest)
 
   err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
-    userObj, err := entity.NewUser(req.Name)
+    userObj, err := entity.NewUser(entity.UserRequest{
+      ID:   r.outport.GenerateID(ctx),
+      Name: req.Name,
+    })
     if err != nil {
       return err
     }
@@ -35,6 +38,8 @@ func (r *registerUserInteractor) Execute(ctx context.Context, req InportRequest)
     if err != nil {
       return err
     }
+
+    res.UserID = userObj.ID
 
     return nil
   })

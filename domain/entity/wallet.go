@@ -24,10 +24,6 @@ type WalletRequest struct {
 
 func NewWallet(req WalletRequest) (*Wallet, error) {
 
-  if req.ID == "" {
-    return nil, apperror.WalletIDMustNotEmpty
-  }
-
   if req.WalletName == "" {
     return nil, apperror.WalletNameMustNotEmpty
   }

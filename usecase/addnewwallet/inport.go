@@ -11,13 +11,15 @@ type Inport interface {
 
 // InportRequest is request payload to run the usecase AddNewWallet
 type InportRequest struct {
-  UserID      string
-  WalletName  string
-  CardName    string
+  UserID        string
+  WalletName    string
+  CardName      string
   LimitAmount   float64
   LimitDuration string
 }
 
 // InportResponse is response payload after running the usecase AddNewWallet
 type InportResponse struct {
+  WalletID string
+  CardID   string
 }

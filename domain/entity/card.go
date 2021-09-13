@@ -20,11 +20,7 @@ type CardRequest struct {
   LimitDuration string
 }
 
-func NewCard(req CardRequest) (obj *Card, err error) {
-
-  if req.ID == "" {
-    return nil, apperror.CardIDMustNotEmpty
-  }
+func NewCard(req CardRequest) (*Card, error) {
 
   if req.CardName == "" {
     return nil, apperror.CardUserNameMustNotEmpty
@@ -39,6 +35,7 @@ func NewCard(req CardRequest) (obj *Card, err error) {
     return nil, apperror.LimitAmountMustNotZero
   }
 
+  var obj Card
   obj.ID = req.ID
   obj.Name = req.CardName
   obj.LimitAmount = limitAmount
@@ -47,5 +44,5 @@ func NewCard(req CardRequest) (obj *Card, err error) {
     return nil, err
   }
 
-  return obj, nil
+  return &obj, nil
 }

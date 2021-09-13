@@ -59,6 +59,14 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
       if err != nil {
         return err
       }
+
+      err = r.updateAndSave(ctx, walletObj, cardSpendHistoryObj)
+      if err != nil {
+        return err
+      }
+
+      res.CardSpendHistoryID = cardSpendHistoryObj.ID
+
       return nil
     }
 
@@ -73,6 +81,12 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
       if err != nil {
         return err
       }
+
+      err = r.updateAndSave(ctx, walletObj, cardSpendHistoryObj)
+      if err != nil {
+        return err
+      }
+
       return nil
     }
 
@@ -81,12 +95,7 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
       return err
     }
 
-    err = r.outport.UpdateWalletBalance(ctx, walletObj)
-    if err != nil {
-      return err
-    }
-
-    err = r.outport.SaveCardSpendHistory(ctx, cardSpendHistoryObj)
+    err = r.updateAndSave(ctx, walletObj, cardSpendHistoryObj)
     if err != nil {
       return err
     }
@@ -100,4 +109,18 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
   }
 
   return res, nil
+}
+
+func (r *spendMoneyInteractor) updateAndSave(ctx context.Context, walletObj *entity.Wallet, cardSpendHistoryObj *entity.CardSpendHistory) error {
+  err := r.outport.UpdateWalletBalance(ctx, walletObj)
+  if err != nil {
+    return err
+  }
+
+  cardSpendHistoryObj.ID = r.outport.GenerateID(ctx)
+  err = r.outport.SaveCardSpendHistory(ctx, cardSpendHistoryObj)
+  if err != nil {
+    return err
+  }
+  return nil
 }

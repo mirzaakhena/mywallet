@@ -37,6 +37,7 @@ func (r *addnewCardInteractor) Execute(ctx context.Context, req InportRequest) (
     }
 
     cardObj, err := entity.NewCard(entity.CardRequest{
+      ID:            r.outport.GenerateID(ctx),
       CardName:      req.CardName,
       LimitAmount:   req.LimitAmount,
       LimitDuration: req.LimitDuration,
@@ -54,6 +55,8 @@ func (r *addnewCardInteractor) Execute(ctx context.Context, req InportRequest) (
     if err != nil {
       return err
     }
+
+    res.CardID = cardObj.ID
 
     return nil
   })

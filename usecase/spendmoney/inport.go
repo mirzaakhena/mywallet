@@ -21,4 +21,5 @@ type InportRequest struct {
 
 // InportResponse is response payload after running the usecase SpendMoney
 type InportResponse struct {
+  CardSpendHistoryID string
 }

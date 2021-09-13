@@ -1,41 +1,78 @@
 package userapi
 
 import (
-	"mywallet/application/apperror"
-	"mywallet/infrastructure/log"
-	"mywallet/infrastructure/util"
-	"mywallet/usecase/showuserwalletinfo"
-	"net/http"
+  "mywallet/infrastructure/log"
+  "mywallet/infrastructure/util"
+  "mywallet/usecase/showuserwalletinfo"
+  "net/http"
 
-	"github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin"
 )
 
 // showUserWalletInfoHandler ...
 func (r *Controller) showUserWalletInfoHandler(inputPort showuserwalletinfo.Inport) gin.HandlerFunc {
 
-	return func(c *gin.Context) {
+  type Card struct {
+    ID            string
+    Name          string
+    LimitAmount   float64
+    LimitDuration string
+  }
 
-		ctx := log.Context(c.Request.Context())
+  type Wallet struct {
+    ID      string
+    Name    string
+    UserID  string
+    Balance float64
+    Cards   []Card
+  }
 
-		var req showuserwalletinfo.InportRequest
-		if err := c.BindJSON(&req); err != nil {
-			newErr := apperror.FailUnmarshalResponseBodyError
-			log.Error(ctx, err.Error())
-			c.JSON(http.StatusBadRequest, NewErrorResponse(newErr))
-			return
-		}
+  type Response struct {
+    Wallets []Wallet
+  }
 
-		log.Info(ctx, util.MustJSON(req))
+  return func(c *gin.Context) {
 
-		res, err := inputPort.Execute(ctx, req)
-		if err != nil {
-			log.Error(ctx, err.Error())
-			c.JSON(http.StatusBadRequest, NewErrorResponse(err))
-			return
-		}
+    ctx := log.Context(c.Request.Context())
 
-		log.Info(ctx, util.MustJSON(res))
-		c.JSON(http.StatusOK, NewSuccessResponse(res))
+    var req showuserwalletinfo.InportRequest
+    req.UserID = c.Param("userID")
 
-	}
+    log.Info(ctx, util.MustJSON(req))
+
+    res, err := inputPort.Execute(ctx, req)
+    if err != nil {
+      log.Error(ctx, err.Error())
+      c.JSON(http.StatusBadRequest, NewErrorResponse(err))
+      return
+    }
+
+    var jsonRes Response
+
+    for _, wallet := range res.Wallets {
+
+      var cards []Card
+
+      for _, card := range wallet.Cards {
+        cards = append(cards, Card{
+          ID:            card.ID,
+          Name:          card.Name,
+          LimitAmount:   float64(card.LimitAmount),
+          LimitDuration: string(card.LimitDuration),
+        })
+      }
+
+      jsonRes.Wallets = append(jsonRes.Wallets, Wallet{
+        ID:      wallet.ID,
+        Name:    wallet.Name,
+        UserID:  wallet.UserID,
+        Balance: float64(wallet.Balance),
+        Cards:   cards,
+      })
+    }
+
+    log.Info(ctx, util.MustJSON(jsonRes))
+    c.JSON(http.StatusOK, NewSuccessResponse(jsonRes))
+
+  }
 }

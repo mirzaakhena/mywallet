@@ -1,6 +1,7 @@
 package userapi
 
 import (
+	"github.com/gin-gonic/gin"
 	"mywallet/usecase/addnewcard"
 	"mywallet/usecase/addnewwallet"
 	"mywallet/usecase/registeruser"
@@ -8,8 +9,6 @@ import (
 	"mywallet/usecase/showuserwalletinfo"
 	"mywallet/usecase/spendmoney"
 	"mywallet/usecase/topupwallet"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Controller struct {
@@ -25,12 +24,13 @@ type Controller struct {
 
 // RegisterRouter registering all the router
 func (r *Controller) RegisterRouter() {
+
 	r.Router.POST("/user", r.authorized(), r.registerUserHandler(r.RegisterUserInport))
 	r.Router.GET("/user", r.authorized(), r.showAllUserHandler(r.ShowAllUserInport))
 
-	r.Router.POST("/wallet", r.authorized(), r.addNewWalletHandler(r.AddNewWalletInport))
-	r.Router.GET("/wallet/:walletId", r.authorized(), r.showUserWalletInfoHandler(r.ShowUserWalletInfoInport))
-	r.Router.POST("/wallet/:walletId/topupwallet", r.authorized(), r.topupWalletHandler(r.TopupWalletInport))
-	r.Router.POST("/wallet/:walletId/card/:cardId/spendmoney", r.authorized(), r.spendMoneyHandler(r.SpendMoneyInport))
-	r.Router.POST("/wallet/:walletId/card", r.authorized(), r.addNewCardHandler(r.AddNewCardInport))
+	r.Router.POST("/user/:userID/wallet", r.authorized(), r.addNewWalletHandler(r.AddNewWalletInport))
+	r.Router.GET("/user/:userID/wallet/", r.authorized(), r.showUserWalletInfoHandler(r.ShowUserWalletInfoInport))
+	r.Router.POST("/user/:userID/wallet/:walletID/topupwallet", r.authorized(), r.topupWalletHandler(r.TopupWalletInport))
+	r.Router.POST("/user/:userID/wallet/:walletID/card/:cardId/spendmoney", r.authorized(), r.spendMoneyHandler(r.SpendMoneyInport))
+	r.Router.POST("/user/:userID/wallet/:walletID/card", r.authorized(), r.addNewCardHandler(r.AddNewCardInport))
 }

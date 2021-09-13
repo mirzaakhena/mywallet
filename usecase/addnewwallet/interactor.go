@@ -25,9 +25,10 @@ func (r *addNewWalletInteractor) Execute(ctx context.Context, req InportRequest)
 
   res := &InportResponse{}
 
-  err := repository.WithTrx(ctx, r.outport, func(dbCtx context.Context) error {
+  err := repository.WithTrx(ctx, r.outport, func(ctx context.Context) error {
 
     cardObj, err := entity.NewCard(entity.CardRequest{
+      ID:            r.outport.GenerateID(ctx),
       CardName:      req.CardName,
       LimitAmount:   req.LimitAmount,
       LimitDuration: req.LimitDuration,
@@ -45,6 +46,7 @@ func (r *addNewWalletInteractor) Execute(ctx context.Context, req InportRequest)
     }
 
     walletObj, err := entity.NewWallet(entity.WalletRequest{
+      ID:         r.outport.GenerateID(ctx),
       WalletName: req.WalletName,
       User:       userObj,
       Card:       cardObj,
@@ -57,6 +59,14 @@ func (r *addNewWalletInteractor) Execute(ctx context.Context, req InportRequest)
     if err != nil {
       return err
     }
+
+    err = r.outport.SaveCard(ctx, walletObj.ID, cardObj)
+    if err != nil {
+      return err
+    }
+
+    res.WalletID = walletObj.ID
+    res.CardID = cardObj.ID
 
     return nil
   })

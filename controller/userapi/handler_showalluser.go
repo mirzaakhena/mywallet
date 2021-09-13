@@ -1,7 +1,6 @@
 package userapi
 
 import (
-	"mywallet/application/apperror"
 	"mywallet/infrastructure/log"
 	"mywallet/infrastructure/util"
 	"mywallet/usecase/showalluser"
@@ -18,14 +17,6 @@ func (r *Controller) showAllUserHandler(inputPort showalluser.Inport) gin.Handle
 		ctx := log.Context(c.Request.Context())
 
 		var req showalluser.InportRequest
-		if err := c.BindJSON(&req); err != nil {
-			newErr := apperror.FailUnmarshalResponseBodyError
-			log.Error(ctx, err.Error())
-			c.JSON(http.StatusBadRequest, NewErrorResponse(newErr))
-			return
-		}
-
-		log.Info(ctx, util.MustJSON(req))
 
 		res, err := inputPort.Execute(ctx, req)
 		if err != nil {

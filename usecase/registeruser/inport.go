@@ -16,4 +16,5 @@ type InportRequest struct {
 
 // InportResponse is response payload after running the usecase RegisterUser
 type InportResponse struct {
+  UserID string
 }

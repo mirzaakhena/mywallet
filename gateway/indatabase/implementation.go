@@ -27,10 +27,15 @@ func NewProdGateway(db *gorm.DB) *prodGateway {
   }
 }
 
+func (r *prodGateway) GenerateID(ctx context.Context) string {
+  id, _ := gonanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 10)
+  return id
+}
+
 func (r *prodGateway) SaveUser(ctx context.Context, obj *entity.User) error {
 
   objToSave := User{
-    ID:   r.generateID(),
+    ID:   obj.ID,
     Name: obj.Name,
   }
 
@@ -40,7 +45,7 @@ func (r *prodGateway) SaveUser(ctx context.Context, obj *entity.User) error {
 func (r *prodGateway) SaveWallet(ctx context.Context, obj *entity.Wallet) error {
 
   objToSave := Wallet{
-    ID:      r.generateID(),
+    ID:      obj.ID,
     Name:    obj.Name,
     UserID:  obj.User.ID,
     Balance: float64(obj.Balance),
@@ -52,7 +57,7 @@ func (r *prodGateway) SaveWallet(ctx context.Context, obj *entity.Wallet) error 
 func (r *prodGateway) SaveCard(ctx context.Context, walletId string, c *entity.Card) error {
 
   objToSave := Card{
-    ID:            r.generateID(),
+    ID:            c.ID,
     WalletID:      walletId,
     Name:          c.Name,
     LimitAmount:   float64(c.LimitAmount),
@@ -65,7 +70,7 @@ func (r *prodGateway) SaveCard(ctx context.Context, walletId string, c *entity.C
 func (r *prodGateway) SaveCardSpendHistory(ctx context.Context, obj *entity.CardSpendHistory) error {
 
   objToSave := CardSpendHistory{
-    ID:               r.generateID(),
+    ID:               obj.ID,
     UserID:           obj.User.ID,
     CardID:           obj.Card.ID,
     Amount:           float64(obj.Amount),
@@ -137,7 +142,7 @@ func (r *prodGateway) FindAllWalletByUser(ctx context.Context, userID string) ([
   }
 
   var wallets []*entity.Wallet
-  err = db.Find(&wallets, "user_id = ?", userID).Error
+  err = db.Preload("Cards").Find(&wallets, "user_id = ?", userID).Error
   if err != nil {
     log.Error(ctx, err.Error())
     return nil, err
@@ -212,9 +217,4 @@ func (r *prodGateway) commonSaving(ctx context.Context, obj interface{}) error {
     return err
   }
   return nil
-}
-
-func (r *prodGateway) generateID() string {
-  id, _ := gonanoid.Generate("ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890", 10)
-  return id
 }
