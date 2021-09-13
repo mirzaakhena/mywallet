@@ -22,7 +22,6 @@ func (r *Controller) showUserWalletInfoHandler(inputPort showuserwalletinfo.Inpo
   type Wallet struct {
     ID      string
     Name    string
-    UserID  string
     Balance float64
     Cards   []Card
   }
@@ -65,7 +64,6 @@ func (r *Controller) showUserWalletInfoHandler(inputPort showuserwalletinfo.Inpo
       jsonRes.Wallets = append(jsonRes.Wallets, Wallet{
         ID:      wallet.ID,
         Name:    wallet.Name,
-        UserID:  wallet.UserID,
         Balance: float64(wallet.Balance),
         Cards:   cards,
       })

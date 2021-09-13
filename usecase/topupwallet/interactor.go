@@ -32,6 +32,10 @@ func (r *topupWalletInteractor) Execute(ctx context.Context, req InportRequest) 
       return err
     }
 
+    if walletObj == nil {
+      return apperror.WalletNotFound
+    }
+
     if walletObj.User.ID != req.UserID {
       return apperror.UserIDDoesNotMatch
     }

@@ -1,41 +1,54 @@
 package userapi
 
 import (
-	"mywallet/application/apperror"
-	"mywallet/infrastructure/log"
-	"mywallet/infrastructure/util"
-	"mywallet/usecase/spendmoney"
-	"net/http"
+  "mywallet/application/apperror"
+  "mywallet/infrastructure/log"
+  "mywallet/infrastructure/util"
+  "mywallet/usecase/spendmoney"
+  "net/http"
+  "time"
 
-	"github.com/gin-gonic/gin"
+  "github.com/gin-gonic/gin"
 )
 
 // spendMoneyHandler ...
 func (r *Controller) spendMoneyHandler(inputPort spendmoney.Inport) gin.HandlerFunc {
 
-	return func(c *gin.Context) {
+  type Request struct {
+    Amount float64
+  }
 
-		ctx := log.Context(c.Request.Context())
+  return func(c *gin.Context) {
 
-		var req spendmoney.InportRequest
-		if err := c.BindJSON(&req); err != nil {
-			newErr := apperror.FailUnmarshalResponseBodyError
-			log.Error(ctx, err.Error())
-			c.JSON(http.StatusBadRequest, NewErrorResponse(newErr))
-			return
-		}
+    ctx := log.Context(c.Request.Context())
 
-		log.Info(ctx, util.MustJSON(req))
+    var jsonReq Request
+    if err := c.BindJSON(&jsonReq); err != nil {
+      newErr := apperror.FailUnmarshalResponseBodyError
+      log.Error(ctx, err.Error())
+      c.JSON(http.StatusBadRequest, NewErrorResponse(newErr))
+      return
+    }
 
-		res, err := inputPort.Execute(ctx, req)
-		if err != nil {
-			log.Error(ctx, err.Error())
-			c.JSON(http.StatusBadRequest, NewErrorResponse(err))
-			return
-		}
+    req := spendmoney.InportRequest{
+      UserID:   c.Param("userID"),
+      WalletID: c.Param("walletID"),
+      CardID:   c.Param("cardID"),
+      Amount:   jsonReq.Amount,
+      Date:     time.Now(),
+    }
 
-		log.Info(ctx, util.MustJSON(res))
-		c.JSON(http.StatusOK, NewSuccessResponse(res))
+    log.Info(ctx, util.MustJSON(req))
 
-	}
+    res, err := inputPort.Execute(ctx, req)
+    if err != nil {
+      log.Error(ctx, err.Error())
+      c.JSON(http.StatusBadRequest, NewErrorResponse(err))
+      return
+    }
+
+    log.Info(ctx, util.MustJSON(res))
+    c.JSON(http.StatusOK, NewSuccessResponse(res))
+
+  }
 }

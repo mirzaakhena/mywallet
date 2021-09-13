@@ -2,6 +2,7 @@ package indatabase
 
 import (
   "context"
+  "errors"
   gonanoid "github.com/matoous/go-nanoid/v2"
   "gorm.io/gorm"
   "mywallet/domain/entity"
@@ -178,7 +179,7 @@ func (r *prodGateway) FindWalletByID(ctx context.Context, walletID string) (*ent
   }
 
   var wallet entity.Wallet
-  err = db.First(&wallet, "id = ?", walletID).Error
+  err = db.Preload("User").Preload("Cards").First(&wallet, "id = ?", walletID).Error
   if err != nil {
     log.Error(ctx, err.Error())
     return nil, err
@@ -196,9 +197,9 @@ func (r *prodGateway) FindLastCardSpendHistory(ctx context.Context, cardID strin
 
   var cardSpendHistory entity.CardSpendHistory
   err = db.Order("date desc").First(&cardSpendHistory, "id = ?", cardID).Error
-  if err != nil {
-    log.Error(ctx, err.Error())
-    return nil, err
+
+  if errors.Is(err, gorm.ErrRecordNotFound) {
+    return nil, nil
   }
 
   return &cardSpendHistory, nil

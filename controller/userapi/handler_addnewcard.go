@@ -13,16 +13,30 @@ import (
 // addNewCardHandler ...
 func (r *Controller) addNewCardHandler(inputPort addnewcard.Inport) gin.HandlerFunc {
 
+	type Request struct {
+		CardName      string
+		LimitAmount   float64
+		LimitDuration string
+	}
+
 	return func(c *gin.Context) {
 
 		ctx := log.Context(c.Request.Context())
 
-		var req addnewcard.InportRequest
-		if err := c.BindJSON(&req); err != nil {
+		var jsonReq addnewcard.InportRequest
+		if err := c.BindJSON(&jsonReq); err != nil {
 			newErr := apperror.FailUnmarshalResponseBodyError
 			log.Error(ctx, err.Error())
 			c.JSON(http.StatusBadRequest, NewErrorResponse(newErr))
 			return
+		}
+
+		req := addnewcard.InportRequest{
+			UserID:        c.Param("userID"),
+			WalletID:      c.Param("walletID"),
+			CardName:      jsonReq.CardName,
+			LimitAmount:   jsonReq.LimitAmount,
+			LimitDuration: jsonReq.LimitDuration,
 		}
 
 		log.Info(ctx, util.MustJSON(req))

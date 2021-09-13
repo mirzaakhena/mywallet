@@ -2,6 +2,7 @@ package spendmoney
 
 import (
   "context"
+  "fmt"
   "mywallet/application/apperror"
   "mywallet/domain/entity"
   "mywallet/domain/repository"
@@ -69,6 +70,8 @@ func (r *spendMoneyInteractor) Execute(ctx context.Context, req InportRequest) (
 
       return nil
     }
+
+    fmt.Printf(">>>>>>>>>>>>> masuk sini? %v\n", cardSpendHistoryObj)
 
     // user already use the balance, so we need to check the limit time
     stillPossibleToSpend, err := cardSpendHistoryObj.IsStillPossibleToSpend(req.Date)

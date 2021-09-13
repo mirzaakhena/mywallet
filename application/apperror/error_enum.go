@@ -25,4 +25,5 @@ const (
 	WalletIDMustNotEmpty                    ErrorType = "ER1000 wallet id must not empty"              //
 	CardIDMustNotEmpty                      ErrorType = "ER1000 card id must not empty"                //
 	CardNotFound                            ErrorType = "ER1000 card not found"                        //
+	WalletNotFound                          ErrorType = "ER1000 wallet not found"                      //
 )

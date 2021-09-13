@@ -31,6 +31,6 @@ func (r *Controller) RegisterRouter() {
 	r.Router.POST("/user/:userID/wallet", r.authorized(), r.addNewWalletHandler(r.AddNewWalletInport))
 	r.Router.GET("/user/:userID/wallet/", r.authorized(), r.showUserWalletInfoHandler(r.ShowUserWalletInfoInport))
 	r.Router.POST("/user/:userID/wallet/:walletID/topupwallet", r.authorized(), r.topupWalletHandler(r.TopupWalletInport))
-	r.Router.POST("/user/:userID/wallet/:walletID/card/:cardId/spendmoney", r.authorized(), r.spendMoneyHandler(r.SpendMoneyInport))
 	r.Router.POST("/user/:userID/wallet/:walletID/card", r.authorized(), r.addNewCardHandler(r.AddNewCardInport))
+	r.Router.POST("/user/:userID/wallet/:walletID/card/:cardID/spendmoney", r.authorized(), r.spendMoneyHandler(r.SpendMoneyInport))
 }
