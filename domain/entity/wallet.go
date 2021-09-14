@@ -1,66 +1,66 @@
 package entity
 
 import (
-  "mywallet/application/apperror"
-  "mywallet/domain/vo"
-  "time"
+	"mywallet/application/apperror"
+	"mywallet/domain/vo"
+	"time"
 )
 
 type Wallet struct {
-  ID      string
-  Name    string
-  User    *User
-  UserID  string
-  Balance vo.Money
-  Cards   []*Card
+	ID      string
+	Name    string
+	User    *User
+	UserID  string
+	Balance vo.Money
+	Cards   []*Card
 }
 
 type WalletRequest struct {
-  ID         string
-  WalletName string
-  User       *User
-  Card       *Card
+	ID         string
+	WalletName string
+	User       *User
+	Card       *Card
 }
 
 func NewWallet(req WalletRequest) (*Wallet, error) {
 
-  if req.WalletName == "" {
-    return nil, apperror.WalletNameMustNotEmpty
-  }
+	if req.WalletName == "" {
+		return nil, apperror.WalletNameMustNotEmpty
+	}
 
-  if req.User == nil {
-    return nil, apperror.UserMustNotNil
-  }
+	if req.User == nil {
+		return nil, apperror.UserMustNotNil
+	}
 
-  if req.Card == nil {
-    return nil, apperror.CardMustNotNil
-  }
+	if req.Card == nil {
+		return nil, apperror.CardMustNotNil
+	}
 
-  var obj Wallet
-  obj.ID = req.ID
-  obj.Name = req.WalletName
-  obj.User = req.User
-  obj.Cards = append(obj.Cards, req.Card)
-  obj.Balance = vo.NewMoneyZero()
+	var obj Wallet
+	obj.ID = req.ID
+	obj.Name = req.WalletName
+	obj.User = req.User
+	obj.Cards = append(obj.Cards, req.Card)
+	obj.Balance = vo.NewMoneyZero()
 
-  return &obj, nil
+	return &obj, nil
 }
 
 func (w *Wallet) AddCard(card *Card) error {
 
-  for _, c := range w.Cards {
-    if c.ID == card.ID {
-      return apperror.CardIDIsExist.Var(card.ID)
-    }
-  }
+	for _, c := range w.Cards {
+		if c.ID == card.ID {
+			return apperror.CardIDIsExist.Var(card.ID)
+		}
+	}
 
-  w.Cards = append(w.Cards, card)
-  return nil
+	w.Cards = append(w.Cards, card)
+	return nil
 }
 
 func (w *Wallet) Topup(amount vo.Money) error {
-  w.Balance += amount
-  return nil
+	w.Balance += amount
+	return nil
 }
 
 //func (w *Wallet) Spend(lastCardSpendHistory *CardSpendHistory, amount vo.Money, cardID string, now time.Time) (*CardSpendHistory, error) {
@@ -89,56 +89,56 @@ func (w *Wallet) Topup(amount vo.Money) error {
 
 func (w *Wallet) SpendRemainingBalance(remainingBalance, amountToSpend vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
 
-  if remainingBalance == 0 {
-    return nil, apperror.CardLimitReachZero
-  }
+	if remainingBalance == 0 {
+		return nil, apperror.CardLimitReachZero
+	}
 
-  if amountToSpend > remainingBalance {
-    return nil, apperror.AmountGreaterThanRemainingBalanceInCard
-  }
+	if amountToSpend > remainingBalance {
+		return nil, apperror.AmountGreaterThanRemainingBalanceInCard
+	}
 
-  newCardSpend := CardSpendHistory{
-    User:             w.User,
-    Card:             card,
-    Amount:           amountToSpend,
-    BalanceRemaining: remainingBalance - amountToSpend,
-    Date:             now,
-  }
+	newCardSpend := CardSpendHistory{
+		User:             w.User,
+		Card:             card,
+		Amount:           amountToSpend,
+		BalanceRemaining: remainingBalance - amountToSpend,
+		Date:             now,
+	}
 
-  w.Balance = w.Balance - amountToSpend
+	w.Balance = w.Balance - amountToSpend
 
-  return &newCardSpend, nil
+	return &newCardSpend, nil
 }
 
 func (w *Wallet) FindCard(cardID string) (*Card, error) {
-  for _, c := range w.Cards {
-    if c.ID == cardID {
-      return c, nil
-    }
-  }
-  return nil, apperror.CardNotFound
+	for _, c := range w.Cards {
+		if c.ID == cardID {
+			return c, nil
+		}
+	}
+	return nil, apperror.CardNotFound
 }
 
 func (w *Wallet) NewLimitToSpend(amount vo.Money, card *Card, now time.Time) (*CardSpendHistory, error) {
 
-  if amount > w.Balance {
-    return nil, apperror.AmountGreaterThanBalance
-  }
+	if amount > w.Balance {
+		return nil, apperror.AmountGreaterThanBalance
+	}
 
-  if amount > card.LimitAmount {
-    return nil, apperror.AmountGreaterThanLimitInCard
-  }
+	if amount > card.LimitAmount {
+		return nil, apperror.AmountGreaterThanLimitInCard
+	}
 
-  newUserSpend := CardSpendHistory{
-    User:             w.User,
-    Card:             card,
-    Amount:           amount,
-    BalanceRemaining: card.LimitAmount - amount,
-    Date:             now,
-  }
+	newUserSpend := CardSpendHistory{
+		User:             w.User,
+		Card:             card,
+		Amount:           amount,
+		BalanceRemaining: card.LimitAmount - amount,
+		Date:             now,
+	}
 
-  w.Balance = w.Balance - amount
+	w.Balance = w.Balance - amount
 
-  return &newUserSpend, nil
+	return &newUserSpend, nil
 
 }

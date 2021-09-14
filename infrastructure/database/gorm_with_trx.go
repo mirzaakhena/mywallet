@@ -1,46 +1,46 @@
 package database
 
 import (
-  "context"
-  "gorm.io/gorm"
-  "mywallet/infrastructure/log"
+	"context"
+	"gorm.io/gorm"
+	"mywallet/infrastructure/log"
 )
 
 type GormWithTrxImpl struct {
-  DB *gorm.DB
+	DB *gorm.DB
 }
 
 func NewGormWithTrxImpl(db *gorm.DB) *GormWithTrxImpl {
-  return &GormWithTrxImpl{DB: db}
+	return &GormWithTrxImpl{DB: db}
 }
 
 func (r *GormWithTrxImpl) BeginTransaction(ctx context.Context) (context.Context, error) {
 
-  dbTrx := r.DB.Begin()
+	dbTrx := r.DB.Begin()
 
-  trxCtx := context.WithValue(ctx, ContextDBValue, dbTrx)
+	trxCtx := context.WithValue(ctx, ContextDBValue, dbTrx)
 
-  return trxCtx, nil
+	return trxCtx, nil
 }
 
 func (r *GormWithTrxImpl) CommitTransaction(ctx context.Context) error {
-  log.Info(ctx, "Commit")
+	log.Info(ctx, "Commit")
 
-  db, err := ExtractDB(ctx)
-  if err != nil {
-    return err
-  }
+	db, err := ExtractDB(ctx)
+	if err != nil {
+		return err
+	}
 
-  return db.Commit().Error
+	return db.Commit().Error
 }
 
 func (r *GormWithTrxImpl) RollbackTransaction(ctx context.Context) error {
-  log.Info(ctx, "Rollback")
+	log.Info(ctx, "Rollback")
 
-  db, err := ExtractDB(ctx)
-  if err != nil {
-    return err
-  }
+	db, err := ExtractDB(ctx)
+	if err != nil {
+		return err
+	}
 
-  return db.Rollback().Error
+	return db.Rollback().Error
 }

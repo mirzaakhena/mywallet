@@ -15,7 +15,7 @@ import (
 func (r *Controller) topupWalletHandler(inputPort topupwallet.Inport) gin.HandlerFunc {
 
 	type Request struct {
-		Amount   float64
+		Amount float64
 	}
 
 	return func(c *gin.Context) {
