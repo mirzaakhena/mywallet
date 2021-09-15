@@ -6,23 +6,27 @@ import (
 	"mywallet/infrastructure/log"
 )
 
+// GormWithTrxImpl ...
 type GormWithTrxImpl struct {
 	DB *gorm.DB
 }
 
+// NewGormWithTrxImpl ...
 func NewGormWithTrxImpl(db *gorm.DB) *GormWithTrxImpl {
 	return &GormWithTrxImpl{DB: db}
 }
 
+// BeginTransaction ...
 func (r *GormWithTrxImpl) BeginTransaction(ctx context.Context) (context.Context, error) {
 
 	dbTrx := r.DB.Begin()
 
-	trxCtx := context.WithValue(ctx, ContextDBValue, dbTrx)
+	trxCtx := context.WithValue(ctx, contextDBValue, dbTrx)
 
 	return trxCtx, nil
 }
 
+// CommitTransaction ...
 func (r *GormWithTrxImpl) CommitTransaction(ctx context.Context) error {
 	log.Info(ctx, "Commit")
 
@@ -34,6 +38,7 @@ func (r *GormWithTrxImpl) CommitTransaction(ctx context.Context) error {
 	return db.Commit().Error
 }
 
+// RollbackTransaction ...
 func (r *GormWithTrxImpl) RollbackTransaction(ctx context.Context) error {
 	log.Info(ctx, "Rollback")
 

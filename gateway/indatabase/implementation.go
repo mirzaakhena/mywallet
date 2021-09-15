@@ -15,6 +15,7 @@ type prodGateway struct {
 	*database.GormWithTrxImpl
 }
 
+// NewProdGateway ...
 func NewProdGateway(db *gorm.DB) *prodGateway {
 
 	_ = db.AutoMigrate(&User{})

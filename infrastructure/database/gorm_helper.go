@@ -8,12 +8,12 @@ import (
 
 type contextDBType string
 
-var ContextDBValue contextDBType = "DB"
+var contextDBValue contextDBType = "DB"
 
 // ExtractDB is used by other repo to extract the database from context
 func ExtractDB(ctx context.Context) (*gorm.DB, error) {
 
-	db, ok := ctx.Value(ContextDBValue).(*gorm.DB)
+	db, ok := ctx.Value(contextDBValue).(*gorm.DB)
 	if !ok {
 		return nil, apperror.DatabaseNotFoundInContextError
 	}

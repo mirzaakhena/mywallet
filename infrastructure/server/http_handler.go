@@ -14,6 +14,7 @@ type GinHTTPHandler struct {
 	Router *gin.Engine
 }
 
+// NewGinHTTPHandler ...
 func NewGinHTTPHandler(address string) (GinHTTPHandler, error) {
 
 	router := gin.Default()
